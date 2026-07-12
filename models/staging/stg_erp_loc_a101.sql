@@ -8,4 +8,4 @@ select
         else trim(cntry)
     end as cntry
 
-from DBT_DB.RAW.erp_loc_a101
+from {{ source('raw_lidl', 'erp_loc_a101') }}

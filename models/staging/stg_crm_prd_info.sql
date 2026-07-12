@@ -28,4 +28,4 @@ select
         )
     ) as prd_end_dt
 
-from DBT_DB.RAW.crm_prd_info
+from {{ source('raw_lidl', 'crm_prd_info') }}

@@ -7,7 +7,7 @@ with ranked_customers as (
             order by cst_create_date desc
         ) as flag_last
 
-    from DBT_DB.RAW.CRM_CUST_INFO
+    from {{ source('raw_lidl', 'crm_cust_info') }}
     where cst_id is not null
 
 )

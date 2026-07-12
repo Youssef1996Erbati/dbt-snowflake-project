@@ -15,4 +15,4 @@ select
         else 'n/a'
     end as gen
 
-from DBT_DB.RAW.erp_cust_az12
+from {{ source('raw_lidl', 'erp_cust_az12') }}

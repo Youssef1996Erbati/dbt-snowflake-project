@@ -4,4 +4,4 @@ select
     subcat,
     maintenance
 
-from DBT_DB.RAW.erp_px_cat_g1v2
+from {{ source('raw_lidl', 'erp_px_cat_g1v2') }}

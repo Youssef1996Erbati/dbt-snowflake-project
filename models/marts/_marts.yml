@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Dimension client, CRM enrichi des données ERP (pays, genre, date de naissance)"
+    columns:
+      - name: customer_key
+        description: "Clé de substitution générée par ROW_NUMBER()"
+        tests: [not_null, unique]
+      - name: customer_id
+        description: "Identifiant client issu du CRM (cst_id)"
+        tests: [not_null, unique]
+      - name: customer_number
+        description: "Clé métier client (cst_key), utilisée pour les jointures ERP"
+      - name: country
+        description: "Pays, issu de erp_loc_a101, normalisé (DE -> Germany, US/USA -> United States)"
+      - name: gender
+        description: "Genre : CRM prioritaire, ERP en repli si 'n/a'"
+      - name: birthdate
+        description: "Date de naissance issue de l'ERP, dates futures mises à NULL"
+
+  - name: dim_products
+    description: "Dimension produit, produits actifs uniquement (prd_end_dt is null)"
+    columns:
+      - name: product_key
+        description: "Clé de substitution générée par ROW_NUMBER()"
+        tests: [not_null, unique]
+      - name: product_id
+        description: "Identifiant produit issu du CRM (prd_id)"
+        tests: [not_null]
+      - name: product_number
+        description: "Clé métier produit (prd_key), utilisée pour la jointure avec les ventes"
+        tests: [not_null]
+      - name: category
+        description: "Catégorie produit issue de erp_px_cat_g1v2"
+      - name: product_line
+        description: "Ligne produit lisible (Mountain, Road, Other Sales, Touring, n/a)"
+
+  - name: fact_sales
+    description: "Table de faits des ventes, au grain de la ligne de commande"
+    columns:
+      - name: order_number
+        description: "Numéro de commande (sls_ord_num)"
+        tests: [not_null]
+      - name: product_key
+        description: "Clé étrangère vers dim_products"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_key
+      - name: customer_key
+        description: "Clé étrangère vers dim_customers"
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_key
+      - name: order_date
+        description: "Date de commande, parsée depuis un entier YYYYMMDD"
+      - name: sales_amount
+        description: "Montant de la vente, recalculé si incohérent avec quantity * abs(price)"
+      - name: quantity
+        description: "Quantité vendue"
+        tests: [not_null]
+      - name: price
+        description: "Prix unitaire, recalculé si nul ou négatif"

@@ -34,4 +34,4 @@ select
         else sls_price
     end as sls_price
 
-from DBT_DB.RAW.crm_sales_details
+from {{ source('raw_lidl', 'crm_sales_details') }}

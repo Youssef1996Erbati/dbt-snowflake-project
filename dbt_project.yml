@@ -33,8 +33,8 @@ models:
   Project_dbt:
     # Config indicated by + and applies to all files under models/example/
     staging:
-      +schema: STAGING
+      +schema: LIDL
       +materialized: view
     marts:
-      +schema: ANALYTICS
+      +schema: LIDL
       +materialized: table

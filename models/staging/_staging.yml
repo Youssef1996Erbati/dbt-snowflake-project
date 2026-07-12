@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: stg_crm_cust_info
+    description: "Clients CRM nettoyés, dédoublonnés (dernier enregistrement par cst_id)"
+    columns:
+      - name: cst_id
+        tests: [not_null, unique]
+      - name: cst_marital_status
+        tests:
+          - accepted_values:
+              values: ['Single', 'Married', 'n/a']
+      - name: cst_gndr
+        tests:
+          - accepted_values:
+              values: ['Female', 'Male', 'n/a']
+
+  - name: stg_crm_prd_info
+    description: "Produits CRM, cat_id extrait, prd_line lisible"
+    columns:
+      - name: prd_id
+        tests: [not_null]
+
+  - name: stg_crm_sales_details
+    description: "Ventes CRM, dates parsées, sales/price recalculés si incohérents"
+    columns:
+      - name: sls_ord_num
+        tests: [not_null]
+
+  - name: stg_erp_cust_az12
+    description: "Clients ERP, préfixe NAS retiré, genre normalisé"
+
+  - name: stg_erp_loc_a101
+    description: "Localisations ERP, cid nettoyé, pays normalisés"
+
+  - name: stg_erp_px_cat_g1v2
+    description: "Catégories produits ERP"
