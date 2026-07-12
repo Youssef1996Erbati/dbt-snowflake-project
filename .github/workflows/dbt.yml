@@ -1,0 +1,66 @@
+name: dbt run quotidien
+
+on:
+  # Planification : tous les jours à 6h00 heure de Paris.
+  # ATTENTION : cron GitHub est toujours en UTC.
+  # 5h UTC = 6h Paris en hiver (CET) / 7h Paris en été (CEST).
+  schedule:
+    - cron: '0 16 * * *'
+
+  # Permet aussi de lancer le workflow à la main depuis l'onglet Actions
+  workflow_dispatch:
+
+  # Et à chaque push sur main : les modèles sont testés avant d'être considérés bons
+  push:
+    branches: [main]
+
+jobs:
+  dbt:
+    runs-on: ubuntu-latest
+
+    # Les secrets GitHub sont injectés en variables d'environnement.
+    # profiles.yml les lit via env_var() -- aucun mot de passe dans le repo.
+    env:
+      SNOWFLAKE_ACCOUNT:   ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER:      ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PASSWORD:  ${{ secrets.SNOWFLAKE_PASSWORD }}
+      SNOWFLAKE_ROLE:      ${{ secrets.SNOWFLAKE_ROLE }}
+      SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+      SNOWFLAKE_DATABASE:  ${{ secrets.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA:    ${{ secrets.SNOWFLAKE_SCHEMA }}
+
+      # Dit à dbt de chercher profiles.yml dans le repo (dossier ci/) et non dans ~/.dbt
+      DBT_PROFILES_DIR: ./ci
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Installer dbt-snowflake
+        run: pip install dbt-snowflake==1.11.4
+
+      - name: Vérifier la connexion Snowflake
+        run: dbt debug
+
+      - name: Construire les modèles
+        run: dbt run
+
+      - name: Lancer les tests de qualité
+        run: dbt test
+
+      - name: Générer la documentation
+        run: dbt docs generate
+
+      # La doc devient téléchargeable depuis l'onglet Actions (utile en démo/entretien)
+      - name: Publier la documentation en artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-docs
+          path: target/
+          retention-days: 30
