@@ -5,7 +5,7 @@ on:
   # ATTENTION : cron GitHub est toujours en UTC.
   # 5h UTC = 6h Paris en hiver (CET) / 7h Paris en été (CEST).
   schedule:
-    - cron: '30 17 * * *'   # 19h30 Paris en été, 18h30 Paris en hiver
+    - cron: '45 16 * * *'   # 19h30 Paris en été, 18h30 Paris en hiver
 
   # Permet aussi de lancer le workflow à la main depuis l'onglet Actions
   workflow_dispatch:
